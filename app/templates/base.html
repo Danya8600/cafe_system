@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Cafe Order{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="header">
+    <div class="container header-content">
+        <h1 class="logo">Cafe Order</h1>
+        <nav class="nav">
+            <a href="{{ url_for('customer.index') }}">Главная</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container main">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>Учебное Flask-приложение для оформления заказов в кафе</p>
+    </div>
+</footer>
+
+</body>
+</html>
