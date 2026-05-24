@@ -21,3 +21,11 @@ class ReferenceRepository:
     @staticmethod
     def get_payment_method_by_name(name):
         return PaymentMethod.query.filter_by(name=name).first()
+
+    @staticmethod
+    def get_order_type_by_id(order_type_id):
+        return OrderType.query.get(order_type_id)
+
+    @staticmethod
+    def get_payment_method_by_id(payment_method_id):
+        return PaymentMethod.query.get(payment_method_id)

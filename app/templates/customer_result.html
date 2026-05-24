@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Заказ оформлен — Cafe Order{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="result-card">
+        <p class="eyebrow">Заказ создан</p>
+        <h2>Заказ №{{ order.id }}</h2>
+
+        <div class="details-grid">
+            <div>
+                <span class="detail-label">Статус</span>
+                <b>
+                    {% if order.status.name == "new" %}
+                        Новый
+                    {% elif order.status.name == "accepted" %}
+                        Принят
+                    {% elif order.status.name == "completed" %}
+                        Завершён
+                    {% elif order.status.name == "cancelled" %}
+                        Отменён
+                    {% else %}
+                        {{ order.status.name }}
+                    {% endif %}
+                </b>
+            </div>
+
+            <div>
+                <span class="detail-label">Тип заказа</span>
+                <b>
+                    {% if order.order_type.name == "delivery" %}
+                        Доставка
+                    {% elif order.order_type.name == "pickup" %}
+                        Самовывоз
+                    {% else %}
+                        {{ order.order_type.name }}
+                    {% endif %}
+                </b>
+            </div>
+
+            <div>
+                <span class="detail-label">Оплата</span>
+                <b>
+                    {% if order.payment_method.name == "cash" %}
+                        Наличные
+                    {% elif order.payment_method.name == "bonus" %}
+                        Бонусы
+                    {% else %}
+                        {{ order.payment_method.name }}
+                    {% endif %}
+                </b>
+            </div>
+
+            <div>
+                <span class="detail-label">Итоговая стоимость</span>
+                <b>{{ order.total_price }} руб.</b>
+            </div>
+        </div>
+
+        <div class="result-block">
+            <h3>Адрес</h3>
+            <p>{{ order.address }}</p>
+        </div>
+
+        <div class="result-block">
+            <h3>Состав заказа</h3>
+
+            {% for item in order.items %}
+                <div class="order-item">
+                    <b>{{ item.menu_item.name }}</b>
+                    <span>{{ item.base_price }} руб.</span>
+
+                    {% if item.extras %}
+                        <ul>
+                            {% for item_extra in item.extras %}
+                                <li>
+                                    {{ item_extra.extra.name }}
+                                    — {{ item_extra.extra_price }} руб.
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="actions">
+            <a class="btn" href="{{ url_for('customer.show_menu') }}">Создать ещё заказ</a>
+            <a class="btn btn-secondary" href="{{ url_for('customer.my_orders') }}">Мои заказы</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Меню — Cafe Order{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="section-title">
+        <p class="eyebrow">Клиентская часть</p>
+        <h2>Оформление заказа</h2>
+        <p>
+            Выберите блюдо, добавки, тип заказа и способ оплаты.
+            Недоступные позиции не отображаются в списке.
+        </p>
+    </div>
+
+    <form class="order-layout" method="post" action="{{ url_for('customer.create_order') }}">
+
+        <div class="card">
+            <h3>1. Выберите блюдо</h3>
+
+            <div class="menu-grid">
+                {% for item in menu_items %}
+                    <label class="menu-card">
+                        <input type="radio" name="menu_item_id" value="{{ item.id }}" required>
+                        <span class="menu-name">{{ item.name }}</span>
+                        <span class="menu-description">{{ item.description }}</span>
+                        <span class="menu-price">{{ item.price }} руб.</span>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>2. Добавки к блюду</h3>
+
+            {% if extras %}
+                <div class="extras-grid">
+                    {% for extra in extras %}
+                        <label class="check-card">
+                            <input type="checkbox" name="extra_ids" value="{{ extra.id }}">
+                            <span>{{ extra.name }}</span>
+                            <b>+ {{ extra.price }} руб.</b>
+                        </label>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">Сейчас нет доступных добавок.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3>3. Тип заказа</h3>
+
+            <div class="option-row">
+                {% for order_type in order_types %}
+                    <label class="check-card">
+                        <input type="radio" name="order_type_id" value="{{ order_type.id }}" required>
+                        {% if order_type.name == "delivery" %}
+                            <span>Доставка</span>
+                        {% elif order_type.name == "pickup" %}
+                            <span>Самовывоз</span>
+                        {% else %}
+                            <span>{{ order_type.name }}</span>
+                        {% endif %}
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="address">Адрес</label>
+                <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    placeholder="Для доставки укажите адрес клиента"
+                >
+                <small>
+                    Если выбран самовывоз, будет использован адрес:
+                    {{ pickup_address }}
+                </small>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>4. Способ оплаты</h3>
+
+            <div class="option-row">
+                {% for payment_method in payment_methods %}
+                    <label class="check-card">
+                        <input type="radio" name="payment_method_id" value="{{ payment_method.id }}" required>
+                        {% if payment_method.name == "cash" %}
+                            <span>Наличные</span>
+                        {% elif payment_method.name == "bonus" %}
+                            <span>Бонусы</span>
+                        {% else %}
+                            <span>{{ payment_method.name }}</span>
+                        {% endif %}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button class="btn btn-wide" type="submit">
+            Оформить заказ
+        </button>
+    </form>
+</section>
+{% endblock %}

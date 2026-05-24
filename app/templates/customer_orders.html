@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Мои заказы — Cafe Order{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="section-title">
+        <p class="eyebrow">История</p>
+        <h2>Мои заказы</h2>
+        <p>
+            Здесь отображаются заказы демонстрационного клиента client1.
+        </p>
+    </div>
+
+    {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+                <a class="order-row" href="{{ url_for('customer.order_result', order_id=order.id) }}">
+                    <div>
+                        <b>Заказ №{{ order.id }}</b>
+                        <span>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</span>
+                    </div>
+
+                    <div>
+                        {% if order.order_type.name == "delivery" %}
+                            Доставка
+                        {% elif order.order_type.name == "pickup" %}
+                            Самовывоз
+                        {% else %}
+                            {{ order.order_type.name }}
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        {% if order.status.name == "new" %}
+                            Новый
+                        {% elif order.status.name == "accepted" %}
+                            Принят
+                        {% elif order.status.name == "completed" %}
+                            Завершён
+                        {% elif order.status.name == "cancelled" %}
+                            Отменён
+                        {% else %}
+                            {{ order.status.name }}
+                        {% endif %}
+                    </div>
+
+                    <strong>{{ order.total_price }} руб.</strong>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <p class="muted">Заказов пока нет.</p>
+            <a class="btn" href="{{ url_for('customer.show_menu') }}">Перейти к меню</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
