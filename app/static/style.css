@@ -2,11 +2,24 @@
     box-sizing: border-box;
 }
 
+:root {
+    --bg-main: #fff8f0;
+    --bg-card: #ffffff;
+    --bg-soft: #fff1df;
+    --text-main: #2d2520;
+    --text-muted: #75685f;
+    --accent: #d9822b;
+    --accent-dark: #a95f16;
+    --accent-light: #f6c28b;
+    --border: #ead7c3;
+    --shadow: rgba(107, 72, 43, 0.12);
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f5f6fa;
-    color: #222;
+    background: var(--bg-main);
+    color: var(--text-main);
 }
 
 .container {
@@ -16,9 +29,10 @@ body {
 }
 
 .header {
-    background: #2c3e50;
+    background: #3a2a20;
     color: #ffffff;
     padding: 18px 0;
+    border-bottom: 4px solid var(--accent);
 }
 
 .header-content {
@@ -30,12 +44,18 @@ body {
 .logo {
     margin: 0;
     font-size: 24px;
+    letter-spacing: 0.5px;
 }
 
 .nav a {
     color: #ffffff;
     text-decoration: none;
     font-weight: bold;
+    transition: color 0.2s ease;
+}
+
+.nav a:hover {
+    color: var(--accent-light);
 }
 
 .main {
@@ -43,31 +63,52 @@ body {
 }
 
 .hero {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    background: var(--bg-card);
+    padding: 34px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px var(--shadow);
 }
 
 .hero h2 {
     margin-top: 0;
-    font-size: 30px;
+    margin-bottom: 16px;
+    font-size: 32px;
+    color: #2d2119;
+}
+
+.hero p {
+    max-width: 800px;
+    line-height: 1.6;
+    color: var(--text-muted);
 }
 
 .info-card {
-    margin-top: 24px;
-    padding: 20px;
-    border-left: 5px solid #e67e22;
-    background: #fff7ef;
-    border-radius: 10px;
+    margin-top: 26px;
+    padding: 22px;
+    border-left: 5px solid var(--accent);
+    background: var(--bg-soft);
+    border-radius: 14px;
 }
 
 .info-card h3 {
     margin-top: 0;
+    margin-bottom: 12px;
+    color: #3a2a20;
+}
+
+.info-card ul {
+    margin-bottom: 0;
+    padding-left: 20px;
+}
+
+.info-card li {
+    margin-bottom: 8px;
+    line-height: 1.4;
 }
 
 .footer {
-    padding: 20px 0;
-    color: #777;
+    padding: 22px 0;
+    color: var(--text-muted);
     text-align: center;
 }
