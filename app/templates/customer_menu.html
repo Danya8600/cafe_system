@@ -8,48 +8,62 @@
         <p class="eyebrow">Клиентская часть</p>
         <h2>Оформление заказа</h2>
         <p>
-            Выберите блюдо, добавки, тип заказа и способ оплаты.
-            Недоступные позиции не отображаются в списке.
+            Выберите одно или несколько блюд. Для каждого выбранного блюда можно отдельно
+            указать количество и выбрать добавки.
         </p>
     </div>
 
     <form class="order-layout" method="post" action="{{ url_for('customer.create_order') }}">
 
         <div class="card">
-            <h3>1. Выберите блюдо</h3>
+            <h3>1. Выберите блюда и добавки</h3>
 
-            <div class="menu-grid">
+            <div class="menu-grid multi-menu-grid">
                 {% for item in menu_items %}
-                    <label class="menu-card">
-                        <input type="radio" name="menu_item_id" value="{{ item.id }}" required>
-                        <span class="menu-name">{{ item.name }}</span>
-                        <span class="menu-description">{{ item.description }}</span>
-                        <span class="menu-price">{{ item.price }} руб.</span>
-                    </label>
+                    <div class="menu-card menu-card-expanded">
+                        <label class="menu-card-main">
+                            <input type="checkbox" name="menu_item_ids" value="{{ item.id }}">
+                            <span class="menu-name">{{ item.name }}</span>
+                            <span class="menu-description">{{ item.description }}</span>
+                            <span class="menu-price">{{ item.price }} руб.</span>
+                        </label>
+
+                        <div class="quantity-row">
+                            <label for="quantity_{{ item.id }}">Количество</label>
+                            <input
+                                type="number"
+                                id="quantity_{{ item.id }}"
+                                name="quantity_{{ item.id }}"
+                                value="1"
+                                min="1"
+                            >
+                        </div>
+
+                        <div class="item-extras">
+                            <b>Добавки к этому блюду:</b>
+
+                            {% if extras %}
+                                {% for extra in extras %}
+                                    <label class="mini-check">
+                                        <input
+                                            type="checkbox"
+                                            name="extra_ids_{{ item.id }}"
+                                            value="{{ extra.id }}"
+                                        >
+                                        <span>{{ extra.name }} (+{{ extra.price }} руб.)</span>
+                                    </label>
+                                {% endfor %}
+                            {% else %}
+                                <span class="muted">Нет доступных добавок.</span>
+                            {% endif %}
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="card">
-            <h3>2. Добавки к блюду</h3>
-
-            {% if extras %}
-                <div class="extras-grid">
-                    {% for extra in extras %}
-                        <label class="check-card">
-                            <input type="checkbox" name="extra_ids" value="{{ extra.id }}">
-                            <span>{{ extra.name }}</span>
-                            <b>+ {{ extra.price }} руб.</b>
-                        </label>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="muted">Сейчас нет доступных добавок.</p>
-            {% endif %}
-        </div>
-
-        <div class="card">
-            <h3>3. Тип заказа</h3>
+            <h3>2. Тип заказа</h3>
 
             <div class="option-row">
                 {% for order_type in order_types %}
@@ -82,7 +96,7 @@
         </div>
 
         <div class="card">
-            <h3>4. Способ оплаты</h3>
+            <h3>3. Способ оплаты</h3>
 
             <div class="option-row">
                 {% for payment_method in payment_methods %}

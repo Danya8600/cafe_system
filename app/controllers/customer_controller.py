@@ -1,18 +1,37 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from sqlalchemy import text
 
 from app.extensions import db
-from app.patterns import DishBuilder, OrderFactory, PaymentContext, PaymentStrategyFactory
+from app.patterns import DishBuilder, OrderFactory, OrderLine, PaymentContext, PaymentStrategyFactory
 from app.repositories import (
     MenuRepository,
+    OrderRepository,
     ReferenceRepository,
     UserRepository,
-    OrderRepository,
 )
 
 customer_bp = Blueprint("customer", __name__)
 
 PICKUP_ADDRESS = "г. Ярославль, ул. Центральная, д. 5, точка выдачи Cafe Order"
+
+
+def get_current_user():
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return None
+
+    return UserRepository.get_by_id(user_id)
+
+
+def login_required():
+    user = get_current_user()
+
+    if user is None:
+        flash("Для выполнения действия необходимо войти в аккаунт.", "error")
+        return None
+
+    return user
 
 
 @customer_bp.route("/")
@@ -36,14 +55,13 @@ def data_check():
         extras = MenuRepository.get_available_extras()
         order_types = ReferenceRepository.get_order_types()
         payment_methods = ReferenceRepository.get_payment_methods()
-        demo_client = UserRepository.get_demo_client()
 
         return {
             "available_menu_count": len(menu_items),
             "available_extras_count": len(extras),
             "order_types": [item.name for item in order_types],
             "payment_methods": [item.name for item in payment_methods],
-            "demo_client": demo_client.username if demo_client else None,
+            "current_user": session.get("username"),
         }
     except Exception as error:
         return {
@@ -53,6 +71,15 @@ def data_check():
 
 @customer_bp.route("/menu")
 def show_menu():
+    current_user = login_required()
+
+    if current_user is None:
+        return redirect(url_for("auth.login"))
+
+    if current_user.role.name != "client":
+        flash("Оформлять заказы может только клиент.", "error")
+        return redirect(url_for("customer.index"))
+
     menu_items = MenuRepository.get_available_menu()
     extras = MenuRepository.get_available_extras()
     order_types = ReferenceRepository.get_order_types()
@@ -71,28 +98,27 @@ def show_menu():
 @customer_bp.route("/orders/create", methods=["POST"])
 def create_order():
     try:
-        demo_client = UserRepository.get_demo_client()
+        current_user = login_required()
 
-        if demo_client is None:
-            flash("В базе данных не найден демонстрационный клиент client1.", "error")
+        if current_user is None:
+            return redirect(url_for("auth.login"))
+
+        if current_user.role.name != "client":
+            flash("Оформлять заказы может только клиент.", "error")
+            return redirect(url_for("customer.index"))
+
+        selected_item_ids = request.form.getlist("menu_item_ids")
+
+        if not selected_item_ids:
+            flash("Выберите хотя бы одно блюдо.", "error")
             return redirect(url_for("customer.show_menu"))
 
-        menu_item_id = request.form.get("menu_item_id", type=int)
         order_type_id = request.form.get("order_type_id", type=int)
         payment_method_id = request.form.get("payment_method_id", type=int)
         delivery_address = request.form.get("address", "").strip()
-        extra_ids = request.form.getlist("extra_ids")
 
-        extra_ids = [int(extra_id) for extra_id in extra_ids if extra_id.isdigit()]
-
-        menu_item = MenuRepository.get_item_by_id(menu_item_id)
         order_type = ReferenceRepository.get_order_type_by_id(order_type_id)
         payment_method = ReferenceRepository.get_payment_method_by_id(payment_method_id)
-        extras = MenuRepository.get_extras_by_ids(extra_ids)
-
-        if menu_item is None or not menu_item.is_available:
-            flash("Выбранное блюдо недоступно.", "error")
-            return redirect(url_for("customer.show_menu"))
 
         if order_type is None:
             flash("Выберите тип заказа.", "error")
@@ -111,8 +137,45 @@ def create_order():
         else:
             order_address = PICKUP_ADDRESS
 
-        dish = DishBuilder.build(menu_item, extras)
-        order = OrderFactory.create_order(order_type, dish, order_address, payment_method)
+        order_lines = []
+
+        for item_id_raw in selected_item_ids:
+            if not item_id_raw.isdigit():
+                continue
+
+            item_id = int(item_id_raw)
+            menu_item = MenuRepository.get_item_by_id(item_id)
+
+            if menu_item is None or not menu_item.is_available:
+                flash("Одно из выбранных блюд недоступно.", "error")
+                return redirect(url_for("customer.show_menu"))
+
+            quantity = request.form.get(f"quantity_{item_id}", type=int)
+
+            if quantity is None or quantity < 1:
+                flash("Количество блюда должно быть не меньше 1.", "error")
+                return redirect(url_for("customer.show_menu"))
+
+            extra_ids_raw = request.form.getlist(f"extra_ids_{item_id}")
+            extra_ids = [int(extra_id) for extra_id in extra_ids_raw if extra_id.isdigit()]
+            extras = MenuRepository.get_extras_by_ids(extra_ids)
+
+            dish = DishBuilder.build(menu_item, extras)
+
+            order_lines.append(
+                OrderLine(
+                    menu_item=menu_item,
+                    dish=dish,
+                    extras=extras,
+                    quantity=quantity
+                )
+            )
+
+        if not order_lines:
+            flash("Не удалось сформировать состав заказа.", "error")
+            return redirect(url_for("customer.show_menu"))
+
+        order = OrderFactory.create_order(order_type, order_lines, order_address, payment_method)
 
         payment_context = PaymentContext()
         payment_strategy = PaymentStrategyFactory.create_strategy(payment_method)
@@ -126,9 +189,7 @@ def create_order():
 
         order_record = OrderRepository.save_order(
             order=order,
-            customer_id=demo_client.id,
-            menu_item=menu_item,
-            extras=extras
+            customer_id=current_user.id
         )
 
         flash(payment_result.get_message(), "success")
@@ -142,23 +203,35 @@ def create_order():
 
 @customer_bp.route("/orders/<int:order_id>/result")
 def order_result(order_id):
+    current_user = login_required()
+
+    if current_user is None:
+        return redirect(url_for("auth.login"))
+
     order = OrderRepository.get_by_id(order_id)
 
     if order is None:
         flash("Заказ не найден.", "error")
         return redirect(url_for("customer.show_menu"))
 
+    if order.customer_id != current_user.id:
+        flash("Вы не можете просматривать чужой заказ.", "error")
+        return redirect(url_for("customer.my_orders"))
+
     return render_template("customer_result.html", order=order)
 
 
 @customer_bp.route("/orders/my")
 def my_orders():
-    demo_client = UserRepository.get_demo_client()
+    current_user = login_required()
 
-    if demo_client is None:
-        flash("В базе данных не найден демонстрационный клиент client1.", "error")
+    if current_user is None:
+        return redirect(url_for("auth.login"))
+
+    if current_user.role.name != "client":
+        flash("Раздел доступен только клиенту.", "error")
         return redirect(url_for("customer.index"))
 
-    orders = OrderRepository.get_customer_orders(demo_client.id)
+    orders = OrderRepository.get_customer_orders(current_user.id)
 
     return render_template("customer_orders.html", orders=orders)

@@ -12,8 +12,19 @@
         <h1 class="logo">Cafe Order</h1>
         <nav class="nav">
             <a href="{{ url_for('customer.index') }}">Главная</a>
-            <a href="{{ url_for('customer.show_menu') }}">Меню</a>
-            <a href="{{ url_for('customer.my_orders') }}">Мои заказы</a>
+
+            {% if session.get("user_id") %}
+                {% if session.get("role") == "client" %}
+                    <a href="{{ url_for('customer.show_menu') }}">Меню</a>
+                    <a href="{{ url_for('customer.my_orders') }}">Мои заказы</a>
+                {% endif %}
+
+                <span class="nav-user">{{ session.get("username") }}</span>
+                <a href="{{ url_for('auth.logout') }}">Выйти</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}">Войти</a>
+                <a href="{{ url_for('auth.register') }}">Регистрация</a>
+            {% endif %}
         </nav>
     </div>
 </header>

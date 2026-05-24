@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — Cafe Order{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <form class="auth-card" method="post" action="{{ url_for('auth.login') }}">
+        <p class="eyebrow">Авторизация</p>
+        <h2>Вход в аккаунт</h2>
+
+        <div class="form-group">
+            <label for="username">Логин</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <button class="btn btn-wide" type="submit">Войти</button>
+
+        <p class="auth-hint">
+            Нет аккаунта?
+            <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a>
+        </p>
+    </form>
+</section>
+{% endblock %}

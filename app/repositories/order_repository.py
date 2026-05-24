@@ -3,16 +3,16 @@ from decimal import Decimal
 
 from app.extensions import db
 from app.models import (
-    OrderRecord,
-    OrderItemRecord,
     OrderItemExtraRecord,
+    OrderItemRecord,
+    OrderRecord,
 )
 from app.repositories.reference_repository import ReferenceRepository
 
 
 class OrderRepository:
     @staticmethod
-    def save_order(order, customer_id, menu_item, extras):
+    def save_order(order, customer_id):
         new_status = ReferenceRepository.get_status_by_name("new")
 
         if new_status is None:
@@ -33,23 +33,24 @@ class OrderRepository:
         db.session.add(order_record)
         db.session.flush()
 
-        order_item = OrderItemRecord(
-            order_id=order_record.id,
-            menu_item_id=menu_item.id,
-            quantity=1,
-            base_price=Decimal(menu_item.price)
-        )
-
-        db.session.add(order_item)
-        db.session.flush()
-
-        for extra in extras:
-            order_item_extra = OrderItemExtraRecord(
-                order_item_id=order_item.id,
-                extra_id=extra.id,
-                extra_price=Decimal(extra.price)
+        for line in order.order_lines:
+            order_item = OrderItemRecord(
+                order_id=order_record.id,
+                menu_item_id=line.menu_item.id,
+                quantity=line.quantity,
+                base_price=Decimal(line.menu_item.price)
             )
-            db.session.add(order_item_extra)
+
+            db.session.add(order_item)
+            db.session.flush()
+
+            for extra in line.extras:
+                order_item_extra = OrderItemExtraRecord(
+                    order_item_id=order_item.id,
+                    extra_id=extra.id,
+                    extra_price=Decimal(extra.price)
+                )
+                db.session.add(order_item_extra)
 
         db.session.commit()
 

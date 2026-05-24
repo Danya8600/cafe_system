@@ -68,8 +68,12 @@
 
             {% for item in order.items %}
                 <div class="order-item">
-                    <b>{{ item.menu_item.name }}</b>
-                    <span>{{ item.base_price }} руб.</span>
+                    <div class="order-item-head">
+                        <b>{{ item.menu_item.name }}</b>
+                        <span>Количество: {{ item.quantity }}</span>
+                    </div>
+
+                    <span>Базовая цена: {{ item.base_price }} руб.</span>
 
                     {% if item.extras %}
                         <ul>
@@ -80,6 +84,8 @@
                                 </li>
                             {% endfor %}
                         </ul>
+                    {% else %}
+                        <p class="muted">Без добавок</p>
                     {% endif %}
                 </div>
             {% endfor %}

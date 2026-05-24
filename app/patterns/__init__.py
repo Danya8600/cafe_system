@@ -7,6 +7,7 @@ from app.patterns.dish_decorator import (
 )
 
 from app.patterns.order_factory import (
+    OrderLine,
     DomainOrder,
     DeliveryOrder,
     PickupOrder,

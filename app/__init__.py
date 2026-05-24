@@ -10,7 +10,10 @@ def create_app():
 
     db.init_app(app)
 
+    from app.controllers.auth_controller import auth_bp
     from app.controllers.customer_controller import customer_bp
+
+    app.register_blueprint(auth_bp)
     app.register_blueprint(customer_bp)
 
     return app

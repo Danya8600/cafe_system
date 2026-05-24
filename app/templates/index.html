@@ -8,19 +8,27 @@
         <p class="eyebrow">Flask-приложение</p>
         <h2>Оформление заказов в кафе</h2>
         <p>
-            В приложении клиент может выбрать блюдо, добавить ингредиенты,
-            указать тип получения заказа и выбрать способ оплаты.
+            В приложении клиент может зарегистрироваться, выбрать несколько блюд,
+            добавить ингредиенты к каждой позиции, указать тип получения заказа
+            и выбрать способ оплаты.
         </p>
 
-        <a class="btn" href="{{ url_for('customer.show_menu') }}">
-            Перейти к меню
-        </a>
+        {% if session.get("user_id") %}
+            <a class="btn" href="{{ url_for('customer.show_menu') }}">
+                Перейти к меню
+            </a>
+        {% else %}
+            <div class="actions">
+                <a class="btn" href="{{ url_for('auth.login') }}">Войти</a>
+                <a class="btn btn-secondary" href="{{ url_for('auth.register') }}">Регистрация</a>
+            </div>
+        {% endif %}
     </div>
 
     <div class="info-card">
         <h3>Используемые паттерны</h3>
         <ul>
-            <li><b>Decorator</b> — добавление ингредиентов к блюду.</li>
+            <li><b>Decorator</b> — добавление ингредиентов к конкретному блюду.</li>
             <li><b>Factory Method</b> — создание заказа доставки или самовывоза.</li>
             <li><b>Strategy</b> — выбор способа оплаты.</li>
         </ul>
