@@ -10,6 +10,7 @@
 <header class="header">
     <div class="container header-content">
         <h1 class="logo">Cafe Order</h1>
+
         <nav class="nav">
             <a href="{{ url_for('customer.index') }}">Главная</a>
 
@@ -17,8 +18,10 @@
                 {% if session.get("role") == "client" %}
                     <a href="{{ url_for('customer.show_menu') }}">Меню</a>
                     <a href="{{ url_for('customer.my_orders') }}">Мои заказы</a>
-                {% elif session.get("role") == "seller" %}
-                    <a href="{{ url_for('seller.show_new_orders') }}">Панель продавца</a>
+                {% endif %}
+
+                {% if session.get("role") == "seller" %}
+                    <a href="{{ url_for('seller.show_orders') }}">Панель продавца</a>
                 {% endif %}
 
                 <span class="nav-user">{{ session.get("username") }}</span>

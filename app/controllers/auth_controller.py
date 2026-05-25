@@ -10,9 +10,9 @@ auth_bp = Blueprint("auth", __name__)
 
 def check_user_password(stored_hash: str, password: str) -> bool:
     """
-    Поддерживает два варианта хранения пароля:
-    1. старые демонстрационные пользователи из SQL-скрипта с md5;
-    2. новые пользователи, зарегистрированные через приложение, с werkzeug-хэшем.
+    Поддерживает два варианта:
+    1. Старые демо-пользователи из SQL-скрипта с md5.
+    2. Новые пользователи, зарегистрированные через приложение, с werkzeug-хэшем.
     """
     if not stored_hash:
         return False
@@ -47,7 +47,7 @@ def login():
         flash("Вы успешно вошли в систему.", "success")
 
         if user.role.name == "seller":
-            return redirect(url_for("seller.show_new_orders"))
+            return redirect(url_for("seller.show_orders"))
 
         return redirect(url_for("customer.show_menu"))
 
