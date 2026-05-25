@@ -311,7 +311,8 @@ body {
     font-weight: bold;
 }
 
-.form-group input {
+.form-group input,
+.status-form select {
     width: 100%;
     padding: 13px 14px;
     border: 1px solid var(--border);
@@ -320,7 +321,8 @@ body {
     background: #fffaf4;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.status-form select:focus {
     outline: 2px solid var(--accent-light);
     border-color: var(--accent);
 }
@@ -510,74 +512,140 @@ body {
     font-weight: bold;
 }
 
-.seller-orders-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 18px;
+.seller-toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 6px 18px var(--shadow);
+}
+
+.filter-link {
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #fffaf4;
+    color: var(--text-main);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    font-weight: bold;
+}
+
+.filter-link.active,
+.filter-link:hover {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+}
+
+.seller-orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .seller-order-card {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    padding: 22px;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 18px;
     box-shadow: 0 8px 24px var(--shadow);
-    color: var(--text-main);
-    text-decoration: none;
-    transition: transform 0.15s ease, border-color 0.15s ease;
+    padding: 20px;
 }
 
-.seller-order-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent);
-}
-
-.seller-order-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-}
-
-.seller-order-info {
+.seller-order-main {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr 0.8fr;
+    gap: 16px;
+    align-items: center;
 }
 
-.seller-order-footer {
+.seller-order-main h3 {
+    margin: 0 0 4px;
+    font-size: 26px;
+}
+
+.seller-order-actions {
+    margin-top: 16px;
     display: flex;
-    justify-content: space-between;
-    gap: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 14px;
+    justify-content: flex-end;
 }
 
 .status-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 7px 12px;
+    display: inline-block;
+    padding: 8px 12px;
     border-radius: 999px;
-    font-size: 13px;
     font-weight: bold;
 }
 
 .status-new {
-    background: var(--bg-soft);
-    color: var(--accent-dark);
-    border: 1px solid var(--accent-light);
+    background: #fff1df;
+    color: #a95f16;
+}
+
+.status-accepted {
+    background: #eaf1ff;
+    color: #305da8;
+}
+
+.status-completed {
+    background: #ecf8ef;
+    color: #276738;
+}
+
+.status-cancelled {
+    background: #ffecec;
+    color: #9d2424;
+}
+
+.seller-detail-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.seller-detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.seller-actions-panel {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background: #fffaf4;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.status-form {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.status-form label {
+    font-weight: bold;
 }
 
 .footer {
     padding: 22px 0;
     color: var(--text-muted);
     text-align: center;
+}
+
+@media (max-width: 900px) {
+    .seller-order-main,
+    .status-form {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 800px) {
@@ -590,8 +658,7 @@ body {
         flex-direction: column;
     }
 
-    .order-row,
-    .seller-order-info {
+    .order-row {
         grid-template-columns: 1fr;
     }
 }

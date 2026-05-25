@@ -6,33 +6,56 @@
 <section class="page-section">
     <div class="section-title">
         <p class="eyebrow">Панель продавца</p>
-        <h2>Новые заказы</h2>
+        <h2>Заказы клиентов</h2>
         <p>
-            Здесь отображаются заказы со статусом <b>new</b>. На этом этапе продавец
-            может просмотреть список новых заказов и открыть состав конкретного заказа.
+            Здесь продавец может просматривать новые заказы, открывать их состав
+            и переходить к обработке заказа.
         </p>
     </div>
 
-    {% if orders %}
-        <div class="seller-orders-grid">
-            {% for order in orders %}
-                <a class="seller-order-card" href="{{ url_for('seller.show_order_details', order_id=order.id) }}">
-                    <div class="seller-order-head">
-                        <div>
-                            <span class="detail-label">Заказ</span>
-                            <b>№{{ order.id }}</b>
-                        </div>
-                        <span class="status-badge status-new">Новый</span>
-                    </div>
+    <div class="seller-toolbar">
+        <a class="filter-link {% if current_status == 'new' %}active{% endif %}"
+           href="{{ url_for('seller.show_orders', status='new') }}">
+            Новые
+        </a>
+        <a class="filter-link {% if current_status == 'accepted' %}active{% endif %}"
+           href="{{ url_for('seller.show_orders', status='accepted') }}">
+            Принятые
+        </a>
+        <a class="filter-link {% if current_status == 'completed' %}active{% endif %}"
+           href="{{ url_for('seller.show_orders', status='completed') }}">
+            Завершённые
+        </a>
+        <a class="filter-link {% if current_status == 'cancelled' %}active{% endif %}"
+           href="{{ url_for('seller.show_orders', status='cancelled') }}">
+            Отменённые
+        </a>
+        <a class="filter-link {% if current_status == 'all' %}active{% endif %}"
+           href="{{ url_for('seller.show_orders', status='all') }}">
+            Все
+        </a>
+    </div>
 
-                    <div class="seller-order-info">
+    {% if orders %}
+        <div class="seller-orders-list">
+            {% for order in orders %}
+                <div class="seller-order-card">
+                    <div class="seller-order-main">
+                        <div>
+                            <p class="eyebrow">Заказ</p>
+                            <h3>№{{ order.id }}</h3>
+                            <span class="muted">
+                                {{ order.created_at.strftime("%d.%m.%Y %H:%M") }}
+                            </span>
+                        </div>
+
                         <div>
                             <span class="detail-label">Клиент</span>
                             <b>{{ order.customer.username }}</b>
                         </div>
 
                         <div>
-                            <span class="detail-label">Тип заказа</span>
+                            <span class="detail-label">Тип</span>
                             <b>
                                 {% if order.order_type.name == "delivery" %}
                                     Доставка
@@ -45,37 +68,39 @@
                         </div>
 
                         <div>
-                            <span class="detail-label">Оплата</span>
-                            <b>
-                                {% if order.payment_method.name == "cash" %}
-                                    Наличные
-                                {% elif order.payment_method.name == "bonus" %}
-                                    Бонусы
+                            <span class="detail-label">Статус</span>
+                            <span class="status-badge status-{{ order.status.name }}">
+                                {% if order.status.name == "new" %}
+                                    Новый
+                                {% elif order.status.name == "accepted" %}
+                                    Принят
+                                {% elif order.status.name == "completed" %}
+                                    Завершён
+                                {% elif order.status.name == "cancelled" %}
+                                    Отменён
                                 {% else %}
-                                    {{ order.payment_method.name }}
+                                    {{ order.status.name }}
                                 {% endif %}
-                            </b>
+                            </span>
                         </div>
 
                         <div>
-                            <span class="detail-label">Стоимость</span>
+                            <span class="detail-label">Сумма</span>
                             <b>{{ order.total_price }} руб.</b>
                         </div>
                     </div>
 
-                    <div class="seller-order-footer">
-                        <span>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</span>
-                        <span>Открыть состав →</span>
+                    <div class="seller-order-actions">
+                        <a class="btn" href="{{ url_for('seller.show_order_details', order_id=order.id) }}">
+                            Открыть заказ
+                        </a>
                     </div>
-                </a>
+                </div>
             {% endfor %}
         </div>
     {% else %}
         <div class="card">
-            <h3>Новых заказов нет</h3>
-            <p class="muted">
-                Когда клиент оформит заказ, он появится в этом разделе.
-            </p>
+            <p class="muted">Заказов по выбранному фильтру пока нет.</p>
         </div>
     {% endif %}
 </section>

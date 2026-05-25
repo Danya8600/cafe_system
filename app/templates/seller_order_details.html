@@ -4,9 +4,17 @@
 
 {% block content %}
 <section class="page-section">
-    <div class="result-card">
-        <p class="eyebrow">Панель продавца</p>
-        <h2>Состав заказа №{{ order.id }}</h2>
+    <div class="result-card seller-detail-card">
+        <div class="seller-detail-header">
+            <div>
+                <p class="eyebrow">Панель продавца</p>
+                <h2>Заказ №{{ order.id }}</h2>
+            </div>
+
+            <a class="btn btn-secondary" href="{{ url_for('seller.show_orders') }}">
+                Назад к заказам
+            </a>
+        </div>
 
         <div class="details-grid">
             <div>
@@ -16,7 +24,7 @@
 
             <div>
                 <span class="detail-label">Статус</span>
-                <b>
+                <span class="status-badge status-{{ order.status.name }}">
                     {% if order.status.name == "new" %}
                         Новый
                     {% elif order.status.name == "accepted" %}
@@ -28,7 +36,7 @@
                     {% else %}
                         {{ order.status.name }}
                     {% endif %}
-                </b>
+                </span>
             </div>
 
             <div>
@@ -58,23 +66,29 @@
             </div>
 
             <div>
-                <span class="detail-label">Стоимость</span>
+                <span class="detail-label">Итоговая стоимость</span>
                 <b>{{ order.total_price }} руб.</b>
             </div>
 
             <div>
-                <span class="detail-label">Дата создания</span>
-                <b>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</b>
+                <span class="detail-label">Принял заказ</span>
+                <b>
+                    {% if order.accepted_by %}
+                        {{ order.accepted_by.username }}
+                    {% else %}
+                        Не принят
+                    {% endif %}
+                </b>
             </div>
         </div>
 
         <div class="result-block">
-            <h3>Адрес выполнения заказа</h3>
+            <h3>Адрес</h3>
             <p>{{ order.address }}</p>
         </div>
 
         <div class="result-block">
-            <h3>Позиции заказа</h3>
+            <h3>Состав заказа</h3>
 
             {% for item in order.items %}
                 <div class="order-item">
@@ -89,7 +103,8 @@
                         <ul>
                             {% for item_extra in item.extras %}
                                 <li>
-                                    {{ item_extra.extra.name }} — {{ item_extra.extra_price }} руб.
+                                    {{ item_extra.extra.name }}
+                                    — {{ item_extra.extra_price }} руб.
                                 </li>
                             {% endfor %}
                         </ul>
@@ -100,10 +115,40 @@
             {% endfor %}
         </div>
 
-        <div class="actions">
-            <a class="btn btn-secondary" href="{{ url_for('seller.show_new_orders') }}">
-                Назад к заказам
-            </a>
+        <div class="seller-actions-panel">
+            {% if order.status.name == "new" %}
+                <form method="post" action="{{ url_for('seller.accept_order', order_id=order.id) }}">
+                    <button class="btn" type="submit">Принять заказ</button>
+                </form>
+            {% endif %}
+
+            {% if order.accepted_by_id %}
+                <form class="status-form" method="post" action="{{ url_for('seller.update_order_status', order_id=order.id) }}">
+                    <label for="status_id">Изменить статус</label>
+                    <select id="status_id" name="status_id" required>
+                        {% for status in statuses %}
+                            <option value="{{ status.id }}" {% if status.id == order.status_id %}selected{% endif %}>
+                                {% if status.name == "new" %}
+                                    Новый
+                                {% elif status.name == "accepted" %}
+                                    Принят
+                                {% elif status.name == "completed" %}
+                                    Завершён
+                                {% elif status.name == "cancelled" %}
+                                    Отменён
+                                {% else %}
+                                    {{ status.name }}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-secondary" type="submit">Сохранить статус</button>
+                </form>
+            {% else %}
+                <p class="muted">
+                    Чтобы изменить статус, сначала примите заказ.
+                </p>
+            {% endif %}
         </div>
     </div>
 </section>
