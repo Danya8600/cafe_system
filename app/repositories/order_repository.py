@@ -6,6 +6,7 @@ from app.models import (
     OrderItemExtraRecord,
     OrderItemRecord,
     OrderRecord,
+    OrderStatus,
 )
 from app.repositories.reference_repository import ReferenceRepository
 
@@ -68,3 +69,17 @@ class OrderRepository:
             .order_by(OrderRecord.created_at.desc())
             .all()
         )
+
+    @staticmethod
+    def get_new_orders():
+        return (
+            OrderRecord.query
+            .join(OrderStatus, OrderRecord.status_id == OrderStatus.id)
+            .filter(OrderStatus.name == "new")
+            .order_by(OrderRecord.created_at.asc())
+            .all()
+        )
+
+    @staticmethod
+    def get_order_details(order_id):
+        return OrderRecord.query.get(order_id)

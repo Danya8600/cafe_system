@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Панель продавца — Cafe Order{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="section-title">
+        <p class="eyebrow">Панель продавца</p>
+        <h2>Новые заказы</h2>
+        <p>
+            Здесь отображаются заказы со статусом <b>new</b>. На этом этапе продавец
+            может просмотреть список новых заказов и открыть состав конкретного заказа.
+        </p>
+    </div>
+
+    {% if orders %}
+        <div class="seller-orders-grid">
+            {% for order in orders %}
+                <a class="seller-order-card" href="{{ url_for('seller.show_order_details', order_id=order.id) }}">
+                    <div class="seller-order-head">
+                        <div>
+                            <span class="detail-label">Заказ</span>
+                            <b>№{{ order.id }}</b>
+                        </div>
+                        <span class="status-badge status-new">Новый</span>
+                    </div>
+
+                    <div class="seller-order-info">
+                        <div>
+                            <span class="detail-label">Клиент</span>
+                            <b>{{ order.customer.username }}</b>
+                        </div>
+
+                        <div>
+                            <span class="detail-label">Тип заказа</span>
+                            <b>
+                                {% if order.order_type.name == "delivery" %}
+                                    Доставка
+                                {% elif order.order_type.name == "pickup" %}
+                                    Самовывоз
+                                {% else %}
+                                    {{ order.order_type.name }}
+                                {% endif %}
+                            </b>
+                        </div>
+
+                        <div>
+                            <span class="detail-label">Оплата</span>
+                            <b>
+                                {% if order.payment_method.name == "cash" %}
+                                    Наличные
+                                {% elif order.payment_method.name == "bonus" %}
+                                    Бонусы
+                                {% else %}
+                                    {{ order.payment_method.name }}
+                                {% endif %}
+                            </b>
+                        </div>
+
+                        <div>
+                            <span class="detail-label">Стоимость</span>
+                            <b>{{ order.total_price }} руб.</b>
+                        </div>
+                    </div>
+
+                    <div class="seller-order-footer">
+                        <span>{{ order.created_at.strftime("%d.%m.%Y %H:%M") }}</span>
+                        <span>Открыть состав →</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <h3>Новых заказов нет</h3>
+            <p class="muted">
+                Когда клиент оформит заказ, он появится в этом разделе.
+            </p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
